@@ -24,7 +24,7 @@
 import { onBeforeMount, ref, watch } from '@vue/runtime-core'
 
 export default {
-  props: ["node"],
+  props: ["node", "edgedata"],
   emits: ["changedInputNode", "deleteNode"],
   setup(props, { emit }){
     const nodetype = ref(null)
@@ -41,6 +41,14 @@ export default {
       emit("deleteNode", props.node.id)
     }
     function changeName(){
+      props.edgedata.forEach((edge) => {
+        if(edge.fromID == props.node.id){
+          edge.from = nameinput.value.value
+        }
+        if(edge.toID == props.node.id){
+          edge.to = nameinput.value.value
+        }
+      })
       props.node.name = nameinput.value.value
     }
     function focusOn(){

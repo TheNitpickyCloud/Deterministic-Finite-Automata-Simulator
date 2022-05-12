@@ -9,7 +9,7 @@
             </svg>
           </div>
           <div v-if="node.settings" style="position: relative;">
-            <SettingsPanel :node="node" @changedInputNode="updateInputNode" @deleteNode="deleteTheNode" />
+            <SettingsPanel :node="node" :edgedata="lines" @changedInputNode="updateInputNode" @deleteNode="deleteTheNode" />
           </div>
         </div>
         <div class="addNodeButton" @click="addNode">Add Node</div>
@@ -23,7 +23,7 @@
 </template>
 
 <script>
-import PlainDraggable from 'plain-draggable'
+import * as Draggabilly from 'draggabilly'
 import LeaderLine from 'leader-line-vue'
 import { onMounted, ref, nextTick } from '@vue/runtime-core'
 import Node from './components/Node.vue'
@@ -87,7 +87,7 @@ export default {
 
       lines.value.forEach((line) => {
         if(line.lineId == edgeId){
-          adj[line.from] = adj[line.from].filter((node) => node.to != line.to)
+          adj[line.fromID] = adj[line.fromID].filter((node) => node.to != line.toID)
           line.line.remove()
         }
       })
@@ -96,21 +96,21 @@ export default {
     }
 
     async function addNode(){
-      nodes.value.push({id: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1), settings: false, nodetype: null, input: false})
+      nodes.value.push({id: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1), settings: false, nodetype: null, input: false, name: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1)})
       
       await nextTick()
 
       allnodes.value.forEach((allnode) => { //DOM element to be draggable
         if(allnode.id == nodes.value[nodes.value.length-1].id){
-          const draggable = new PlainDraggable(allnode)
-          draggable.onMove = () => {
+          const draggable = new Draggabilly(allnode)
+          draggable.on('dragMove', () => {
             //update position for each line
             lines.value.forEach((line) => {
               if(line.line.start == allnode || line.line.end == allnode){
                 line.line.position()
               }
             })
-          }
+          })
         }
       })
 
@@ -180,7 +180,19 @@ export default {
             ).setOptions({path: 'arc', startPlug: "disc"})
           }
 
-          lines.value.push({line: line, lineId: (lines.value.length ? lines.value[lines.value.length-1].lineId+1 : 1), from: selectedNodeId, to: theid})
+          let fromname = null
+          let toname = null
+
+          nodes.value.forEach((node) => {
+            if(node.id == from.id){
+              fromname = node.name
+            }
+            if(node.id == to.id){
+              toname = node.name
+            }
+          })
+
+          lines.value.push({line: line, lineId: (lines.value.length ? lines.value[lines.value.length-1].lineId+1 : 1), from: fromname, to: toname, fromID: from.id, toID: to.id})
 
           //add to adjacency list
           adj[selectedNodeId].push({to: theid, label: ''}) //edge type
@@ -193,15 +205,15 @@ export default {
 
     onMounted(() => {
       allnodes.value.forEach((allnode) => { //DOM element to be draggable
-        const draggable = new PlainDraggable(allnode)
-        draggable.onMove = () => {
+        const draggable = new Draggabilly(allnode)
+        draggable.on('dragMove', () => {
           //update position for each line
           lines.value.forEach((line) => {
             if(line.line.start == allnode || line.line.end == allnode){
               line.line.position()
             }
           })
-        }
+        })
       })
     })
 
@@ -244,6 +256,9 @@ export default {
   height: 50px;
   border-radius: 20px;
   background: grey;
+}
+.container:hover{
+  cursor: grab;
 }
 .edgeDisplay{
   column-span: 1;

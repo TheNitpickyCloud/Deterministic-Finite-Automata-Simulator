@@ -26,7 +26,7 @@ export default {
         props.line.line.middleLabel = lineLabel.value
       }
       props.line.label = lineLabel.value
-      emit("edgeLabelUpdated", props.line.from, props.line.to, lineLabel.value) //edge from, edge to, update that adjacency list
+      emit("edgeLabelUpdated", props.line.fromID, props.line.toID, lineLabel.value) //edge from, edge to, update that adjacency list
     }
 
     return { removeEdge, updateLabel, lineLabel }

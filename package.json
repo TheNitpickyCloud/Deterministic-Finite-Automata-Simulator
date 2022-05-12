@@ -8,8 +8,8 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "draggabilly": "^3.0.0",
     "leader-line-vue": "^2.1.1",
-    "plain-draggable": "^2.5.14",
     "vue": "^3.2.13"
   },
   "devDependencies": {
