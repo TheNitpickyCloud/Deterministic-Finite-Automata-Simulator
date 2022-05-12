@@ -102,7 +102,9 @@ export default {
 
       allnodes.value.forEach((allnode) => { //DOM element to be draggable
         if(allnode.id == nodes.value[nodes.value.length-1].id){
-          const draggable = new Draggabilly(allnode)
+          const draggable = new Draggabilly(allnode, {
+            containment: '.containNodes'
+          })
           draggable.on('dragMove', () => {
             //update position for each line
             lines.value.forEach((line) => {
@@ -205,7 +207,9 @@ export default {
 
     onMounted(() => {
       allnodes.value.forEach((allnode) => { //DOM element to be draggable
-        const draggable = new Draggabilly(allnode)
+        const draggable = new Draggabilly(allnode, {
+          containment: '.containNodes'
+        })
         draggable.on('dragMove', () => {
           //update position for each line
           lines.value.forEach((line) => {
