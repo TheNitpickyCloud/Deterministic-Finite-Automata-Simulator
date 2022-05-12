@@ -48,10 +48,6 @@ export default {
 
     nodes.value = [ //the node data
       { id: 1, settings: false, nodetype: null, input: false, name: 1 },
-      { id: 2, settings: false, nodetype: null, input: false, name: 2  },
-      { id: 3, settings: false, nodetype: null, input: false, name: 3  },
-      { id: 4, settings: false, nodetype: null, input: false, name: 4  },
-      { id: 5, settings: false, nodetype: null, input: false, name: 5  },
     ]
 
     //initialize adjacency list
@@ -97,7 +93,8 @@ export default {
 
     async function addNode(){
       nodes.value.push({id: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1), settings: false, nodetype: null, input: false, name: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1)})
-      
+      adj[nodes.value[nodes.value.length-1].id] = []
+
       await nextTick()
 
       allnodes.value.forEach((allnode) => { //DOM element to be draggable
@@ -106,6 +103,14 @@ export default {
             containment: '.containNodes'
           })
           draggable.on('dragMove', () => {
+            //update position for each line
+            lines.value.forEach((line) => {
+              if(line.line.start == allnode || line.line.end == allnode){
+                line.line.position()
+              }
+            })
+          })
+          draggable.on('dragEnd', () => {
             //update position for each line
             lines.value.forEach((line) => {
               if(line.line.start == allnode || line.line.end == allnode){
@@ -218,6 +223,14 @@ export default {
             }
           })
         })
+        draggable.on('dragEnd', () => {
+          //update position for each line
+          lines.value.forEach((line) => {
+            if(line.line.start == allnode || line.line.end == allnode){
+              line.line.position()
+            }
+          })
+        })
       })
     })
 
@@ -254,8 +267,7 @@ export default {
   background: rgb(240, 240, 240);
 }
 .container{
-  display: inline-block;
-  position: relative;
+  position: absolute;
   width: 50px;
   height: 50px;
   border-radius: 20px;
