@@ -2,16 +2,17 @@
     <div class="contain">
       <div class="containNodes">
         <div v-for="node in nodes" :key="node.id" :id="node.id" ref="allnodes" class="container" @click.ctrl="toggleNewLink(node.id)"> <!-- the actual node, call all functions here --> 
-          <Node :theID="node.id"/>
+          <Node :name="node.name"/>
           <div class="settingsButton" @click="node.settings = !node.settings"> 
             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="blue" class="bi bi-gear-fill" viewBox="0 0 16 16">
               <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
             </svg>
           </div>
           <div v-if="node.settings" style="position: relative;">
-            <SettingsPanel />
+            <SettingsPanel :node="node" @changedInputNode="updateInputNode" @deleteNode="deleteTheNode" />
           </div>
         </div>
+        <div class="addNodeButton" @click="addNode">Add Node</div>
       </div>
       <div class="edgeDisplay">
         <div v-for="line in lines" :key="line.lineId" class="edgedata" @mouseenter="enterOver(line)" @mouseleave="leaveOver(line)">
@@ -24,7 +25,7 @@
 <script>
 import PlainDraggable from 'plain-draggable'
 import LeaderLine from 'leader-line-vue'
-import { onMounted, ref } from '@vue/runtime-core'
+import { onMounted, ref, nextTick } from '@vue/runtime-core'
 import Node from './components/Node.vue'
 import EdgeData from './components/EdgeData.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
@@ -46,11 +47,11 @@ export default {
     let mouseover = false
 
     nodes.value = [ //the node data
-      { id: 1, settings: false },
-      { id: 2, settings: false },
-      { id: 3, settings: false },
-      { id: 4, settings: false },
-      { id: 5, settings: false },
+      { id: 1, settings: false, nodetype: null, input: false, name: 1 },
+      { id: 2, settings: false, nodetype: null, input: false, name: 2  },
+      { id: 3, settings: false, nodetype: null, input: false, name: 3  },
+      { id: 4, settings: false, nodetype: null, input: false, name: 4  },
+      { id: 5, settings: false, nodetype: null, input: false, name: 5  },
     ]
 
     //initialize adjacency list
@@ -92,6 +93,43 @@ export default {
       })
       
       lines.value = lines.value.filter((line) => line.lineId != edgeId)
+    }
+
+    async function addNode(){
+      nodes.value.push({id: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1), settings: false, nodetype: null, input: false})
+      
+      await nextTick()
+
+      allnodes.value.forEach((allnode) => { //DOM element to be draggable
+        if(allnode.id == nodes.value[nodes.value.length-1].id){
+          const draggable = new PlainDraggable(allnode)
+          draggable.onMove = () => {
+            //update position for each line
+            lines.value.forEach((line) => {
+              if(line.line.start == allnode || line.line.end == allnode){
+                line.line.position()
+              }
+            })
+          }
+        }
+      })
+
+      await nextTick()
+    }
+
+    function updateInputNode(nodeid, val){
+      nodes.value.forEach((node) => {
+        if(node.id == nodeid){
+          node.input = val
+        }
+        else{
+          node.input = false
+        }
+      })
+    }
+
+    function deleteTheNode(nodeid){
+      nodes.value = nodes.value.filter((node) => node.id != nodeid)
     }
 
     function toggleNewLink(theid){
@@ -167,7 +205,7 @@ export default {
       })
     })
 
-    return { nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel }
+    return { nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteTheNode, addNode }
   }
 }
 </script>
@@ -175,8 +213,8 @@ export default {
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: none;
+  -moz-osx-font-smoothing: none;
   text-align: center;
   color: #2c3e50;
 }
@@ -195,6 +233,8 @@ export default {
   grid-template-rows: 100%;
 }
 .containNodes{
+  border-radius: 20px;
+  position: relative;
   background: rgb(240, 240, 240);
 }
 .container{
@@ -210,6 +250,7 @@ export default {
   overflow-y: auto;
 }
 .edgedata{
+  border-radius: 20px;
   background: lightgray;
   padding: 10px;
 }
@@ -223,6 +264,22 @@ export default {
   background-image: radial-gradient(circle, whitesmoke 50%, rgba(255,0,0,0) 50%);
 }
 .settingsButton:hover{
+  cursor: pointer;
+}
+.addNodeButton{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 20px;
+  background: coral;
+  width: 100px;
+  height: 30px;
+  position: absolute;
+  left: 98%;
+  top: 98%;
+  transform: translate(-100%, -100%);
+}
+.addNodeButton:hover{
   cursor: pointer;
 }
 </style>

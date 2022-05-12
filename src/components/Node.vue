@@ -1,6 +1,6 @@
 <template>
   <span class="nodeText">
-    <h3>{{ theID }}</h3>
+    <h3>{{ name }}</h3>
   </span>
 </template>
 
@@ -8,7 +8,7 @@
 
 
 export default {
-    props: ["theID"],
+    props: ["name"],
     setup(props){
         
     }
