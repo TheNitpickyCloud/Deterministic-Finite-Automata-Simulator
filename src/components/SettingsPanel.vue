@@ -11,7 +11,7 @@
       <label> Rejecting </label>
     </div>
     <div class="inputselect">
-      <label>Input: </label>
+      <label>Start State: </label>
       <input class="typeinputcheck" type="checkbox" v-model="inputornot" @change="inputNodeChanged" />
     </div>
   </div>
@@ -107,6 +107,7 @@ export default {
   transition: all 0.1s;
 }
 .inputselect{
+  font-size: 0.925em;
   margin-top: 10px;
   margin-left: 5px;
   display: flex;
@@ -124,13 +125,14 @@ export default {
   transition: all 0.1s;
 }
 .nameset{
+  margin-left: 2px;
   font-size: 12px;
   width: 100%;
   margin-bottom: 10px;
 }
 .namesetinput{
   display: inline-block;
-  width: 50%;
+  width: 45%;
   border-radius: 10px;
   padding-left: 4px;
   padding-right: 4px;

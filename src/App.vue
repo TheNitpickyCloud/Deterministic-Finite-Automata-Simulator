@@ -1,7 +1,7 @@
 <template>
     <div class="contain">
       <div class="containNodes">
-        <div v-for="node in nodes" :key="node.id" :id="node.id" ref="allnodes" class="container" @click.ctrl="toggleNewLink(node.id)"> <!-- the actual node, call all functions here --> 
+        <div v-for="node in nodes" :key="node.id" :id="node.id" ref="allnodes" class="container" @click.ctrl="toggleNewLink(node.id)" @click.meta="toggleNewLink(node.id)"> <!-- the actual node, call all functions here --> 
           <Node :name="node.name"/>
           <div class="settingsButton" @click="node.settings = !node.settings"> 
             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="blue" class="bi bi-gear-fill" viewBox="0 0 16 16">
@@ -20,7 +20,7 @@
         <div class="addNodeButton" @click="addNode">Add Node</div>
       </div>
       <div class="edgeDisplay">
-        <div v-for="line in lines" :key="line.lineId" class="edgedata" @mouseenter="enterOver(line)" @mouseleave="leaveOver(line)">
+        <div v-for="line in linesComputed" :key="line.lineId" class="edgedata" @mouseenter="enterOver(line)" @mouseleave="leaveOver(line)">
           <EdgeData :line="line" @edgeRemoved="removeEdge" @edgeLabelUpdated="updateLabel" />
         </div>
       </div>
@@ -41,7 +41,7 @@
 <script>
 import * as Draggabilly from 'draggabilly'
 import LeaderLine from 'leader-line-vue'
-import { onMounted, ref, nextTick } from '@vue/runtime-core'
+import { onMounted, ref, nextTick, computed } from '@vue/runtime-core'
 import Node from './components/Node.vue'
 import EdgeData from './components/EdgeData.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
@@ -65,7 +65,7 @@ export default {
     let mouseover = false
 
     nodes.value = [ //the node data
-      { id: 1, settings: false, nodetype: null, input: false, name: 1 },
+      { id: 1, settings: false, nodetype: "Rejecting", input: false, name: 1 },
     ]
 
     //initialize adjacency list
@@ -110,7 +110,7 @@ export default {
     }
 
     async function addNode(){
-      nodes.value.push({id: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1), settings: false, nodetype: null, input: false, name: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1)})
+      nodes.value.push({id: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1), settings: false, nodetype: "Rejecting", input: false, name: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1)})
       adj[nodes.value[nodes.value.length-1].id] = []
 
       await nextTick()
@@ -143,9 +143,27 @@ export default {
     }
 
     function updateInputNode(nodeid, val){
+      lines.value.forEach((line) => {
+        if(line.display == false){
+          line.line.remove()
+        }
+      })
+      lines.value = lines.value.filter((line) => line.display)
+
       nodes.value.forEach((node) => {
         if(node.id == nodeid){
           node.input = val
+          if(node.input == true){
+            allnodes.value.forEach((allnode) => {
+              if(allnode.id == node.id){
+                let line = new LeaderLine.setLine(
+                  allnode,
+                  LeaderLine.obj.pointAnchor(allnode, {x: '0%', y: '50%'}),
+                ).setOptions({startSocket: 'left', endSocket: 'left', path: 'fluid'})
+                lines.value.push({line: line, lineId: (lines.value.length ? lines.value[lines.value.length-1].lineId+1 : 1), from: null, to: null, fromID: node.id, toID: node.id, display: false})
+              }
+            })
+          }
         }
         else{
           node.input = false
@@ -222,7 +240,7 @@ export default {
             }
           })
 
-          lines.value.push({line: line, lineId: (lines.value.length ? lines.value[lines.value.length-1].lineId+1 : 1), from: fromname, to: toname, fromID: from.id, toID: to.id})
+          lines.value.push({line: line, lineId: (lines.value.length ? lines.value[lines.value.length-1].lineId+1 : 1), from: fromname, to: toname, fromID: from.id, toID: to.id, display: true})
 
           //add to adjacency list
           adj[selectedNodeId].push({to: theid, label: ''}) //edge type
@@ -303,6 +321,10 @@ export default {
       }
     }
 
+    const linesComputed = computed(() => {
+      return lines.value.filter((line) => line.display)
+    })
+
     onMounted(() => {
       allnodes.value.forEach((allnode) => { //DOM element to be draggable
         const draggable = new Draggabilly(allnode, {
@@ -327,7 +349,7 @@ export default {
       })
     })
 
-    return { nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, startstr, runInput, answer }
+    return { nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, startstr, runInput, answer, linesComputed }
   }
 }
 </script>
