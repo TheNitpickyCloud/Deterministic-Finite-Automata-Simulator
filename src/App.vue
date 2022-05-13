@@ -155,6 +155,11 @@ export default {
 
     function deleteNode(nodeid){
       nodes.value = nodes.value.filter((node) => node.id != nodeid)
+      lines.value.forEach((line) => {
+        if(line.fromID == nodeid || line.toID == nodeid){
+          removeEdge(line.lineId)
+        }
+      })
     }
 
     function toggleNewLink(theid){
