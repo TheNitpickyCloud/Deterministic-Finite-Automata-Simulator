@@ -3,7 +3,7 @@
   <div class="removeEdgeButton" @click="removeEdge(line.lineId)"> Remove </div>
   <div class="labelInputpar">
     <span> label: </span>
-    <input class="labelInput" v-model="lineLabel" @input="updateLabel" maxlength="10" />
+    <input class="labelInput" v-model="lineLabel" @input="updateLabel" maxlength="1" />
   </div>
 </template>
 
@@ -25,7 +25,7 @@ export default {
       if(lineLabel.value.length == 0){
         props.line.line.middleLabel = lineLabel.value
       }
-      props.line.label = lineLabel.value
+
       emit("edgeLabelUpdated", props.line.fromID, props.line.toID, lineLabel.value) //edge from, edge to, update that adjacency list
     }
 

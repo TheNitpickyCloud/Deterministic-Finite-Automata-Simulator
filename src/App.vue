@@ -9,7 +9,12 @@
             </svg>
           </div>
           <div v-if="node.settings" style="position: relative;">
-            <SettingsPanel :node="node" :edgedata="lines" @changedInputNode="updateInputNode" @deleteNode="deleteTheNode" />
+            <SettingsPanel :node="node" :edgedata="lines" @changedInputNode="updateInputNode" />
+          </div>
+          <div class="deleteButton" @click="deleteNode(node.id)">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="red" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
+              <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
+            </svg>
           </div>
         </div>
         <div class="addNodeButton" @click="addNode">Add Node</div>
@@ -19,6 +24,17 @@
           <EdgeData :line="line" @edgeRemoved="removeEdge" @edgeLabelUpdated="updateLabel" />
         </div>
       </div>
+    </div>
+    <div class="endinput">
+      Input String: 
+      <input class="inputstrinput" ref="startstr" />
+      <div class="runButton" @click="runInput">
+        Run!
+      </div>
+    </div>
+    <div class="output">
+      Result: 
+      <span>{{ answer }}</span>
     </div>
 </template>
 
@@ -38,9 +54,11 @@ export default {
     SettingsPanel
   },
   setup(){
-    const nodes = ref([])
-    const allnodes = ref([])
+    const nodes = ref([]) //nodes objects
+    const allnodes = ref([]) //nodes DOM elements
     const lines = ref([]) //lines here
+    const startstr = ref('') //input string
+    const answer = ref('') //answer
     let selectedOne = false
     let selectedNodeId = null
     let adj = [] //adjacency list of nodes
@@ -135,7 +153,7 @@ export default {
       })
     }
 
-    function deleteTheNode(nodeid){
+    function deleteNode(nodeid){
       nodes.value = nodes.value.filter((node) => node.id != nodeid)
     }
 
@@ -210,6 +228,76 @@ export default {
       }
     }
 
+    function runInput(){
+      if(startstr.value.value == ''){
+        alert("please provide an input string")
+      }
+      else{
+        let proceed = false
+        let inpnode = null
+        nodes.value.forEach((node) => {
+          if(node.input == true){
+            proceed = true
+            inpnode = node.id
+          }
+        })
+
+        if(!proceed){
+          alert("please set an input node")
+        }
+        else{
+          let nodename = null
+          let emptyLabel = false
+          nodes.value.forEach((node) => {
+            if(node.nodetype == null){
+              proceed = false
+              nodename = node.name
+            }
+          })
+          for (let i = 0; i < adj.length; i++) {
+            adj[i].forEach((node) => {
+              if(node.label == ''){
+                emptyLabel = true
+              }
+            })
+          }
+
+          if(nodename != null){
+            alert("please set the type (Accepting/Rejecting) for node " + nodename)
+          }
+          else if(emptyLabel){
+            alert("please make sure all edges have labels")
+          }
+          else{
+            //algorithm to determine the output
+            let arr = [] //object of ids, how much input string used
+            let ans = []
+            arr.push({id: inpnode, trav: 0})
+
+            while(arr.length){
+              let node = arr.pop()
+              if(node.trav < startstr.value.value.length){
+                adj[node.id].forEach((child) => {
+                  if(child.label == startstr.value.value[node.trav]){
+                    arr.push({id: child.to, trav: node.trav+1})
+                  }
+                })
+              }
+              else if(node.trav == startstr.value.value.length){
+                nodes.value.forEach((nd) => {
+                  if(node.id == nd.id){
+                    ans.push(nd.nodetype)
+                  }
+                })
+              }
+            }
+
+            answer.value = ans[0]
+          }
+        }
+      }
+    }
+
     onMounted(() => {
       allnodes.value.forEach((allnode) => { //DOM element to be draggable
         const draggable = new Draggabilly(allnode, {
@@ -234,7 +322,7 @@ export default {
       })
     })
 
-    return { nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteTheNode, addNode }
+    return { nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, startstr, runInput, answer }
   }
 }
 </script>
@@ -242,8 +330,8 @@ export default {
 <style>
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: none;
-  -moz-osx-font-smoothing: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
 }
@@ -252,7 +340,7 @@ export default {
 <style scoped>
 .contain{
   position: absolute;
-  top: 50%;
+  top: 47%;
   left: 50%;
   transform: translate(-50%, -50%);
   height: 70%;
@@ -312,5 +400,54 @@ export default {
 }
 .addNodeButton:hover{
   cursor: pointer;
+}
+.deleteButton{
+  position: absolute;
+  top: -8%;
+  left: 70%;
+  width: 40%;
+  height: 40%;
+  background: whitesmoke;
+  border-radius: 50%;
+}
+.deleteButton:hover{
+  cursor: pointer;
+}
+.endinput{
+  margin-top: 20px;
+  position: absolute;
+  top: 85%;
+  left: 42%;
+  transform: translate(-50%, -50%);
+}
+.inputstrinput{
+  display: inline-block;
+  border-radius: 20px;
+  font-size: 15px;
+  padding-left: 6px;
+  padding-right: 6px;
+  padding-top: 4px;
+  padding-bottom: 4px;
+  border: 1px grey solid;
+}
+.runButton{
+  margin-left: 30px;
+  display: inline-block;
+  border-radius: 20px;
+  width: 100px;
+  height: 20px;
+  background: red;
+  color: whitesmoke;
+  padding: 4px;
+}
+.runButton:hover{
+  cursor: pointer;
+}
+.output{
+  margin-top: 20px;
+  position: absolute;
+  top: 90%;
+  left: 42%;
+  transform: translate(-50%, -50%);
 }
 </style>

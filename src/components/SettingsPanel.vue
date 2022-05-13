@@ -2,7 +2,7 @@
   <div class="panel">
     <div class="nameset" @click="focusOn">
       Name: 
-      <input type="text" class="namesetinput" ref="nameinput" @input="changeName" maxlength="4" />
+      <input type="text" class="namesetinput" ref="nameinput" @input="changeName" @change="checkName" maxlength="4" />
     </div>
     <div class="typeselect">
       <input class="typeinput" type="radio" :name="nodetype+node.id" value="Accepting" v-model="nodetype" @change="changeType" />
@@ -14,18 +14,15 @@
       <label>Input: </label>
       <input class="typeinputcheck" type="checkbox" v-model="inputornot" @change="inputNodeChanged" />
     </div>
-    <div class="deleteButton" @click="deleteNode">
-      delete
-    </div>
   </div>
 </template>
 
 <script>
-import { onBeforeMount, ref, watch } from '@vue/runtime-core'
+import { onBeforeMount, onMounted, ref, watch } from '@vue/runtime-core'
 
 export default {
   props: ["node", "edgedata"],
-  emits: ["changedInputNode", "deleteNode"],
+  emits: ["changedInputNode"],
   setup(props, { emit }){
     const nodetype = ref(null)
     const inputornot = ref(false)
@@ -37,10 +34,22 @@ export default {
     function inputNodeChanged(){
       emit("changedInputNode", props.node.id, inputornot.value)
     }
-    function deleteNode(){
-      emit("deleteNode", props.node.id)
-    }
     function changeName(){
+      props.edgedata.forEach((edge) => {
+        if(edge.fromID == props.node.id){
+          edge.from = nameinput.value.value
+        }
+        if(edge.toID == props.node.id){
+          edge.to = nameinput.value.value
+        }
+      })
+      props.node.name = nameinput.value.value
+    }
+    function checkName(){
+      if(nameinput.value.value == ''){
+        nameinput.value.value = props.node.id
+      }
+
       props.edgedata.forEach((edge) => {
         if(edge.fromID == props.node.id){
           edge.from = nameinput.value.value
@@ -63,8 +72,11 @@ export default {
       nodetype.value = props.node.nodetype
       inputornot.value = props.node.input
     })
+    onMounted(() => {
+      nameinput.value.value = props.node.id
+    })
 
-    return { nodetype, inputornot, changeType, inputNodeChanged, deleteNode, nameinput, changeName, focusOn}
+    return { nodetype, inputornot, changeType, inputNodeChanged, nameinput, changeName, checkName, focusOn}
   } 
 }
 </script>
@@ -74,7 +86,7 @@ export default {
   position: absolute;
   bottom: 0;
   right: 105%;
-  height: 135px;
+  height: 105px;
   width: 100px;
   background: lightskyblue;
   border-radius: 20px;
@@ -111,23 +123,6 @@ export default {
   transform: scale(1.25);
   transition: all 0.1s;
 }
-.deleteButton{
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  padding-top: 2px;
-  padding-bottom: 2px;
-  padding-right: 1px;
-  padding-left: 1px;
-  margin-top: 10px;
-  width: 70px;
-  background: red;
-  color: whitesmoke;
-  border-radius: 20px;
-}
-.deleteButton:hover{
-  cursor: pointer;
-}
 .nameset{
   font-size: 12px;
   width: 100%;
@@ -136,5 +131,11 @@ export default {
 .namesetinput{
   display: inline-block;
   width: 50%;
+  border-radius: 10px;
+  padding-left: 4px;
+  padding-right: 4px;
+  padding-top: 2px;
+  padding-bottom: 2px;
+  border: 1px grey solid;
 }
 </style>
