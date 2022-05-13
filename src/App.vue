@@ -20,6 +20,9 @@
         <div class="addNodeButton" @click="addNode">Add Node</div>
       </div>
       <div class="edgeDisplay">
+        <div v-if="linesComputed.length == 0">
+          <HowToUse />
+        </div>
         <div v-for="line in linesComputed" :key="line.lineId" class="edgedata" @mouseenter="enterOver(line)" @mouseleave="leaveOver(line)">
           <EdgeData :line="line" @edgeRemoved="removeEdge" @edgeLabelUpdated="updateLabel" />
         </div>
@@ -45,13 +48,15 @@ import { onMounted, ref, nextTick, computed } from '@vue/runtime-core'
 import Node from './components/Node.vue'
 import EdgeData from './components/EdgeData.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
+import HowToUse from './components/HowToUse.vue'
 
 export default {
   name: 'App',
   components: {
     Node,
     EdgeData,
-    SettingsPanel
+    SettingsPanel,
+    HowToUse
   },
   setup(){
     const nodes = ref([]) //nodes objects
