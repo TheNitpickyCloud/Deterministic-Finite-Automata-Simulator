@@ -1,7 +1,7 @@
 <template>
     <div class="contain">
       <div class="containNodes">
-        <div v-for="node in nodes" :key="node.id" :id="node.id" ref="allnodes" class="container" @click.ctrl="toggleNewLink(node.id)" @click.meta="toggleNewLink(node.id)"> <!-- the actual node, call all functions here --> 
+        <div v-for="node in nodes" :key="node.id" :id="node.id" ref="allnodes" class="container" :class="{ 'extraRing': node.nodetype == 'Accepting' }" @click.ctrl="toggleNewLink(node.id)" @click.meta="toggleNewLink(node.id)"> <!-- the actual node, call all functions here --> 
           <Node :name="node.name"/>
           <div class="settingsButton" @click="node.settings = !node.settings"> 
             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="blue" class="bi bi-gear-fill" viewBox="0 0 16 16">
@@ -183,6 +183,10 @@ export default {
           removeEdge(line.lineId)
         }
       })
+      if(selectedNodeId == nodeid){
+        selectedNodeId = null
+        selectedOne = false
+      }
     }
 
     function toggleNewLink(theid){
@@ -271,17 +275,10 @@ export default {
         })
 
         if(!proceed){
-          alert("please set an input node")
+          alert("please set the start node")
         }
         else{
-          let nodename = null
           let emptyLabel = false
-          nodes.value.forEach((node) => {
-            if(node.nodetype == null){
-              proceed = false
-              nodename = node.name
-            }
-          })
           for (let i = 0; i < adj.length; i++) {
             adj[i].forEach((node) => {
               if(node.label == ''){
@@ -290,10 +287,7 @@ export default {
             })
           }
 
-          if(nodename != null){
-            alert("please set the type (Accepting/Rejecting) for node " + nodename)
-          }
-          else if(emptyLabel){
+          if(emptyLabel){
             alert("please make sure all edges have labels")
           }
           else{
@@ -306,7 +300,27 @@ export default {
               let node = arr.pop()
               if(node.trav < startstr.value.value.length){
                 adj[node.id].forEach((child) => {
-                  if(child.label == startstr.value.value[node.trav]){
+                  let proceed = true
+                  let letters = []
+                  for (let i = 0; i < child.label.length; i++) {
+                    if(child.label[i] == ' '){
+                      proceed = false
+                    }
+                    if(i%2 == 0){
+                      if(child.label[i] == ','){
+                        proceed = false
+                        alert("please use a valid label for the edges (no spaces, all states should be seperated by a comma, no extra commas anywhere)")
+                      }
+                      letters.push(child.label[i])
+                    }
+                    else{
+                      if(child.label[i] != ','){
+                        proceed = false
+                        alert("please use a valid label for the edges (no spaces, all states should be seperated by a comma, no extra commas anywhere)")
+                      }
+                    }
+                  }
+                  if(proceed && letters.includes(startstr.value.value[node.trav])){
                     arr.push({id: child.to, trav: node.trav+1})
                   }
                 })
@@ -388,10 +402,11 @@ export default {
 }
 .container{
   position: absolute;
-  width: 50px;
-  height: 50px;
+  width: 46px;
+  height: 46px;
   border-radius: 20px;
   background: grey;
+  border: 2px solid black;
 }
 .container:hover{
   cursor: grab;
@@ -481,5 +496,9 @@ export default {
   top: 90%;
   left: 42%;
   transform: translate(-50%, -50%);
+}
+.extraRing{
+  outline: 2px solid black;
+  outline-offset: 3.5px;
 }
 </style>
