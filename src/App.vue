@@ -1,15 +1,16 @@
 <template>
+    <TweakPane :tweakAble="tweakAble" :lines="lines" />
     <div class="contain">
       <div class="containNodes">
         <div v-for="node in nodes" :key="node.id" :id="node.id" ref="allnodes" class="container" :class="{ 'extraRing': node.nodetype == 'Accepting' }" @click.ctrl="toggleNewLink(node.id)" @click.meta="toggleNewLink(node.id)"> <!-- the actual node, call all functions here --> 
           <Node :name="node.name"/>
           <div class="settingsButton" @click="node.settings = !node.settings"> 
-            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="blue" class="bi bi-gear-fill" viewBox="0 0 16 16">
+            <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" :fill="tweakAble.settingsButtonColor" class="bi bi-gear-fill" viewBox="0 0 16 16">
               <path d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 1 0-5.86 2.929 2.929 0 0 1 0 5.858z"/>
             </svg>
           </div>
           <div v-if="node.settings" style="position: relative;">
-            <SettingsPanel :node="node" :edgedata="lines" @changedInputNode="updateInputNode" />
+            <SettingsPanel :node="node" :edgedata="lines" @changedInputNode="updateInputNode" :tweakAble="tweakAble" />
           </div>
           <div class="deleteButton" @click="deleteNode(node.id)">
             <svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" fill="red" class="bi bi-x-circle-fill" viewBox="0 0 16 16">
@@ -49,6 +50,7 @@ import Node from './components/Node.vue'
 import EdgeData from './components/EdgeData.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import HowToUse from './components/HowToUse.vue'
+import TweakPane from './components/TweakPane.vue'
 
 export default {
   name: 'App',
@@ -56,9 +58,25 @@ export default {
     Node,
     EdgeData,
     SettingsPanel,
-    HowToUse
+    HowToUse,
+    TweakPane
   },
   setup(){
+    const tweakAble = ref({
+      edgeColor: '#fc7e54FF',
+      edgeHighlightColor: '#FF0000FF',
+      nodeBgColor: '#818080FF',
+      settingsPanelColor: '#87CEFAFF',
+      settingsButtonColor: '#0000FFFF',
+      addNodeBgColor: '#FF7F50FF',
+      addNodeTextColor: '#2c3e50FF',
+      edgeDataBgColor: '#D3D3D3FF',
+      edgeDataTextColor: '#2c3e50FF',
+      playgroundBg: '#f0f0f0FF',
+      leftCol: '75%',
+      rightCol: '25%',
+    })
+
     const nodes = ref([]) //nodes objects
     const allnodes = ref([]) //nodes DOM elements
     const lines = ref([]) //lines here
@@ -80,14 +98,14 @@ export default {
 
     function enterOver(line){
       if(mouseover == false){
-        line.line.color = 'red'
+        line.line.color = tweakAble.value.edgeHighlightColor
         line.line.size++
         mouseover = true
       }
     }
     function leaveOver(line){
       if(mouseover){
-        line.line.color = 'rgb(252,126,84)'
+        line.line.color = tweakAble.value.edgeColor
         line.line.size--
         mouseover = false
       }
@@ -368,7 +386,7 @@ export default {
       })
     })
 
-    return { nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, startstr, runInput, answer, linesComputed }
+    return { tweakAble, nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, startstr, runInput, answer, linesComputed }
   }
 }
 </script>
@@ -392,20 +410,20 @@ export default {
   height: 70%;
   width: 80%;
   display: grid;
-  grid-template-columns: 80% 20%;
+  grid-template-columns: v-bind('tweakAble.leftCol') v-bind('tweakAble.rightCol');
   grid-template-rows: 100%;
 }
 .containNodes{
-  border-radius: 20px;
+  border-radius: 10px;
   position: relative;
-  background: rgb(240, 240, 240);
+  background: v-bind('tweakAble.playgroundBg');
 }
 .container{
   position: absolute;
   width: 46px;
   height: 46px;
-  border-radius: 20px;
-  background: grey;
+  border-radius: 50%;
+  background: v-bind('tweakAble.nodeBgColor');
   border: 2px solid black;
 }
 .container:hover{
@@ -416,8 +434,12 @@ export default {
   overflow-y: auto;
 }
 .edgedata{
-  border-radius: 20px;
-  background: lightgray;
+  color: v-bind('tweakAble.edgeDataTextColor');
+  margin: auto;
+  margin-bottom: 8px;
+  width: 85%;
+  border-radius: 10px;
+  background: v-bind('tweakAble.edgeDataBgColor');
   padding: 10px;
 }
 .settingsButton{
@@ -433,16 +455,17 @@ export default {
   cursor: pointer;
 }
 .addNodeButton{
+  color: v-bind('tweakAble.addNodeTextColor');
   display: flex;
   justify-content: center;
   align-items: center;
-  border-radius: 20px;
-  background: coral;
-  width: 100px;
-  height: 30px;
+  border-radius: 10px;
+  background: v-bind('tweakAble.addNodeBgColor');
+  width: 116.5px;
+  height: 35px;
   position: absolute;
-  left: 98%;
-  top: 98%;
+  left: 99%;
+  top: 8.5%;
   transform: translate(-100%, -100%);
 }
 .addNodeButton:hover{

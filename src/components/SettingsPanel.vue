@@ -21,12 +21,13 @@
 import { onBeforeMount, onMounted, ref, watch } from '@vue/runtime-core'
 
 export default {
-  props: ["node", "edgedata"],
+  props: ["node", "edgedata", "tweakAble"],
   emits: ["changedInputNode"],
   setup(props, { emit }){
     const nodetype = ref(null)
     const inputornot = ref(false)
     const nameinput = ref()
+    const tweakAble = props.tweakAble
 
     function changeType(){
       props.node.nodetype = nodetype.value
@@ -76,7 +77,7 @@ export default {
       nameinput.value.value = props.node.id
     })
 
-    return { nodetype, inputornot, changeType, inputNodeChanged, nameinput, changeName, checkName, focusOn}
+    return { tweakAble, nodetype, inputornot, changeType, inputNodeChanged, nameinput, changeName, checkName, focusOn}
   } 
 }
 </script>
@@ -88,7 +89,7 @@ export default {
   right: 105%;
   height: 105px;
   width: 100px;
-  background: lightskyblue;
+  background: v-bind('tweakAble.settingsPanelColor');
   border-radius: 20px;
   padding: 10px;
 }
