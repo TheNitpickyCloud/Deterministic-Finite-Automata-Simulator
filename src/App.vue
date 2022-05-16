@@ -29,17 +29,7 @@
         </div>
       </div>
     </div>
-    <div class="endinput">
-      Input String: 
-      <input class="inputstrinput" ref="startstr" />
-      <div class="runButton" @click="runInput">
-        Run!
-      </div>
-    </div>
-    <div class="output">
-      Result: 
-      <span>{{ answer }}</span>
-    </div>
+    <Result :nodes="nodes" :adj="adj" />
 </template>
 
 <script>
@@ -51,6 +41,7 @@ import EdgeData from './components/EdgeData.vue'
 import SettingsPanel from './components/SettingsPanel.vue'
 import HowToUse from './components/HowToUse.vue'
 import TweakPane from './components/TweakPane.vue'
+import Result from './components/Result.vue'
 
 export default {
   name: 'App',
@@ -59,7 +50,8 @@ export default {
     EdgeData,
     SettingsPanel,
     HowToUse,
-    TweakPane
+    TweakPane,
+    Result
   },
   setup(){
     const tweakAble = ref({
@@ -80,11 +72,9 @@ export default {
     const nodes = ref([]) //nodes objects
     const allnodes = ref([]) //nodes DOM elements
     const lines = ref([]) //lines here
-    const startstr = ref('') //input string
-    const answer = ref('') //answer
     let selectedOne = false
     let selectedNodeId = null
-    let adj = [] //adjacency list of nodes
+    const adj = ref([]) //adjacency list of nodes
     let mouseover = false
 
     nodes.value = [ //the node data
@@ -93,7 +83,7 @@ export default {
 
     //initialize adjacency list
     for (let i = 0; i <= nodes.value.length; i++) {
-      adj[i] = []
+      adj.value[i] = []
     }
 
     function enterOver(line){
@@ -112,7 +102,7 @@ export default {
     }
 
     function updateLabel(from, to, lineLabel){
-      adj[from].forEach((node) => {
+      adj.value[from].forEach((node) => {
         if(node.to == to){
           node.label = lineLabel
         }
@@ -124,7 +114,7 @@ export default {
 
       lines.value.forEach((line) => {
         if(line.lineId == edgeId){
-          adj[line.fromID] = adj[line.fromID].filter((node) => node.to != line.toID)
+          adj.value[line.fromID] = adj.value[line.fromID].filter((node) => node.to != line.toID)
           line.line.remove()
         }
       })
@@ -134,7 +124,7 @@ export default {
 
     async function addNode(){
       nodes.value.push({id: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1), settings: false, nodetype: "Rejecting", input: false, name: (nodes.value.length ? nodes.value[nodes.value.length-1].id+1 : 1)})
-      adj[nodes.value[nodes.value.length-1].id] = []
+      adj.value[nodes.value[nodes.value.length-1].id] = []
 
       await nextTick()
 
@@ -230,8 +220,8 @@ export default {
         })
 
         //check for duplicate
-        for (let i = 0; i < adj.length; i++) {
-          adj[i].forEach((j) => {
+        for (let i = 0; i < adj.value.length; i++) {
+          adj.value[i].forEach((j) => {
             if(i == selectedNodeId && j.to == theid){
               proceed = false
             }
@@ -244,7 +234,7 @@ export default {
           if(from == to){
             line = new LeaderLine.setLine(
               from,
-              LeaderLine.obj.pointAnchor(to, {x: '100%', y: '55%'}),
+              LeaderLine.obj.pointAnchor(to, {x: '100%', y: '50%'}),
             ).setOptions({startSocket: 'left', endSocket: 'right', path: 'fluid', startPlug: 'disc', startSocketGravity: [-40, -70], endSocketGravity: [40, -70]})
           }
           //add link from-to
@@ -270,91 +260,11 @@ export default {
           lines.value.push({line: line, lineId: (lines.value.length ? lines.value[lines.value.length-1].lineId+1 : 1), from: fromname, to: toname, fromID: from.id, toID: to.id, display: true})
 
           //add to adjacency list
-          adj[selectedNodeId].push({to: theid, label: ''}) //edge type
+          adj.value[selectedNodeId].push({to: theid, label: '', line: line}) //edge type
         }
 
         selectedOne = false
         selectedNodeId = null
-      }
-    }
-
-    function runInput(){
-      if(startstr.value.value == ''){
-        alert("please provide an input string")
-      }
-      else{
-        let proceed = false
-        let inpnode = null
-        nodes.value.forEach((node) => {
-          if(node.input == true){
-            proceed = true
-            inpnode = node.id
-          }
-        })
-
-        if(!proceed){
-          alert("please set the start node")
-        }
-        else{
-          let emptyLabel = false
-          for (let i = 0; i < adj.length; i++) {
-            adj[i].forEach((node) => {
-              if(node.label == ''){
-                emptyLabel = true
-              }
-            })
-          }
-
-          if(emptyLabel){
-            alert("please make sure all edges have labels")
-          }
-          else{
-            //algorithm to determine the output
-            let arr = [] //object of ids, how much input string used
-            let ans = []
-            arr.push({id: inpnode, trav: 0})
-
-            while(arr.length){
-              let node = arr.pop()
-              if(node.trav < startstr.value.value.length){
-                adj[node.id].forEach((child) => {
-                  let proceed = true
-                  let letters = []
-                  for (let i = 0; i < child.label.length; i++) {
-                    if(child.label[i] == ' '){
-                      proceed = false
-                    }
-                    if(i%2 == 0){
-                      if(child.label[i] == ','){
-                        proceed = false
-                        alert("please use a valid label for the edges (no spaces, all states should be seperated by a comma, no extra commas anywhere)")
-                      }
-                      letters.push(child.label[i])
-                    }
-                    else{
-                      if(child.label[i] != ','){
-                        proceed = false
-                        alert("please use a valid label for the edges (no spaces, all states should be seperated by a comma, no extra commas anywhere)")
-                      }
-                    }
-                  }
-                  if(proceed && letters.includes(startstr.value.value[node.trav])){
-                    arr.push({id: child.to, trav: node.trav+1})
-                  }
-                })
-              }
-              else if(node.trav == startstr.value.value.length){
-                nodes.value.forEach((nd) => {
-                  if(node.id == nd.id){
-                    ans.push(nd.nodetype)
-                  }
-                })
-              }
-            }
-
-            answer.value = ans[0]
-          }
-        }
       }
     }
 
@@ -386,7 +296,7 @@ export default {
       })
     })
 
-    return { tweakAble, nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, startstr, runInput, answer, linesComputed }
+    return { tweakAble, nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, adj, linesComputed }
   }
 }
 </script>
@@ -404,7 +314,7 @@ export default {
 <style scoped>
 .contain{
   position: absolute;
-  top: 47%;
+  top: 42%;
   left: 50%;
   transform: translate(-50%, -50%);
   height: 70%;
@@ -483,42 +393,8 @@ export default {
 .deleteButton:hover{
   cursor: pointer;
 }
-.endinput{
-  margin-top: 20px;
-  position: absolute;
-  top: 85%;
-  left: 42%;
-  transform: translate(-50%, -50%);
-}
-.inputstrinput{
-  display: inline-block;
-  border-radius: 20px;
-  font-size: 15px;
-  padding-left: 6px;
-  padding-right: 6px;
-  padding-top: 4px;
-  padding-bottom: 4px;
-  border: 1px grey solid;
-}
-.runButton{
-  margin-left: 30px;
-  display: inline-block;
-  border-radius: 20px;
-  width: 100px;
-  height: 20px;
-  background: red;
-  color: whitesmoke;
-  padding: 4px;
-}
 .runButton:hover{
   cursor: pointer;
-}
-.output{
-  margin-top: 20px;
-  position: absolute;
-  top: 90%;
-  left: 42%;
-  transform: translate(-50%, -50%);
 }
 .extraRing{
   outline: 2px solid black;
