@@ -30,6 +30,11 @@ export default {
             alpha: true,
         })
 
+        pane.addInput(props.tweakAble, 'nodeBorderColor', {
+            view: 'color',
+            alpha: true,
+        })
+
         pane.addInput(props.tweakAble, 'settingsPanelColor', {
             view: 'color',
             alpha: true,

@@ -22,12 +22,12 @@
         <div class="norm">{{ prev }}</div>
         <div class="curr">{{ curr }}</div>
         <div class="norm">{{ nxt }}</div>
-        <div class="nextButton" @click="runInput">next character</div>
+        <div class="nextButton" @click="runInput">Next Character</div>
       </div>
     </div>
     <div class="output">
-      Result: 
-      <span>{{ answer }}</span>
+      <span style="font-size: 1.2em;"> Result: </span>
+      <span :class="{ 'accept': answer == 'Accepting', 'reject': answer == 'Rejecting' }">{{ answer }}</span>
     </div>
   </div>
 </template>
@@ -201,7 +201,7 @@ export default {
   width: 100%;
   margin-top: 20px;
   position: absolute;
-  top: 81.5%;
+  top: 81%;
   left: 42%;
   transform: translate(-50%, -50%);
 }
@@ -216,24 +216,25 @@ export default {
   border: 1px grey solid;
 }
 .runButton{
-  margin-left: 30px;
-  margin-top: 12px;
-  border-radius: 20px;
+  margin-left: 40px;
+  margin-top: 15px;
+  border-radius: 10px;
   position: absolute;
   top: 90%;
   left: 47%;
   transform: translate(-50%, -50%);
   width: 90px;
   height: 18px;
-  background: red;
-  color: whitesmoke;
+  background: #ff4b32FF;
+  color: white;
   padding: 4px;
 }
 .runButton:hover{
   cursor: pointer;
 }
 .output{
-  margin-top: 35px;
+  margin-left: 30px;
+  margin-top: 40px;
   position: absolute;
   top: 100%;
   left: 47%;
@@ -270,7 +271,8 @@ export default {
 }
 .nextButton{
   display: inline-block;
-  background: coral;
+  background: #ff4b32FF;
+  color: white;
   border-radius: 10px;
   padding-right: 10px;
   padding-left: 10px;
@@ -282,16 +284,26 @@ export default {
   cursor: pointer;
 }
 .choice{
-  margin-top: 10px;
+  margin-top: 5px;
 }
 .mid{
   margin-left: 40px;
   width: 100%;
-  margin-top: 12px;
+  margin-top: 15px;
   border-radius: 20px;
   position: absolute;
   top: 90%;
   left: 47%;
   transform: translate(-50%, -50%);
+}
+.accept{
+  font-size: 1.2em;
+  color: green;
+  border-bottom: 2px green solid;
+}
+.reject{
+  font-size: 1.2em;
+  color: red;
+  border-bottom: 2px red solid;
 }
 </style>

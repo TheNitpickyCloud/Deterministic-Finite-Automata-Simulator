@@ -55,16 +55,17 @@ export default {
   },
   setup(){
     const tweakAble = ref({
-      edgeColor: '#fc7e54FF',
-      edgeHighlightColor: '#FF0000FF',
-      nodeBgColor: '#818080FF',
-      settingsPanelColor: '#87CEFAFF',
-      settingsButtonColor: '#0000FFFF',
-      addNodeBgColor: '#FF7F50FF',
-      addNodeTextColor: '#2c3e50FF',
-      edgeDataBgColor: '#D3D3D3FF',
+      edgeColor: '#ff4b32FF',
+      edgeHighlightColor: '#3f3f3fFF',
+      nodeBgColor: '#ebebebFF',
+      nodeBorderColor: '#000000FF',
+      settingsPanelColor: '#b5c1cfFF',
+      settingsButtonColor: '#3f3f3fFF',
+      addNodeBgColor: '#ff4b32FF',
+      addNodeTextColor: '#ebebebFF',
+      edgeDataBgColor: '#ebebebFF',
       edgeDataTextColor: '#2c3e50FF',
-      playgroundBg: '#f0f0f0FF',
+      playgroundBg: '#ebebebFF',
       leftCol: '75%',
       rightCol: '25%',
     })
@@ -172,7 +173,7 @@ export default {
                 let line = new LeaderLine.setLine(
                   allnode,
                   LeaderLine.obj.pointAnchor(allnode, {x: '0%', y: '50%'}),
-                ).setOptions({startSocket: 'left', endSocket: 'left', path: 'fluid'})
+                ).setOptions({startSocket: 'left', endSocket: 'left', path: 'fluid', color: '#ff4b32FF'})
                 lines.value.push({line: line, lineId: (lines.value.length ? lines.value[lines.value.length-1].lineId+1 : 1), from: null, to: null, fromID: node.id, toID: node.id, display: false})
               }
             })
@@ -257,6 +258,7 @@ export default {
             }
           })
 
+          line.color = '#ff4b32FF'
           lines.value.push({line: line, lineId: (lines.value.length ? lines.value[lines.value.length-1].lineId+1 : 1), from: fromname, to: toname, fromID: from.id, toID: to.id, display: true})
 
           //add to adjacency list
@@ -334,7 +336,7 @@ export default {
   height: 46px;
   border-radius: 50%;
   background: v-bind('tweakAble.nodeBgColor');
-  border: 2px solid black;
+  border: 2px solid v-bind('tweakAble.nodeBorderColor');
 }
 .container:hover{
   cursor: grab;
@@ -397,7 +399,7 @@ export default {
   cursor: pointer;
 }
 .extraRing{
-  outline: 2px solid black;
+  outline: 2px solid v-bind('tweakAble.nodeBorderColor');
   outline-offset: 3.5px;
 }
 </style>
