@@ -138,7 +138,7 @@ export default {
             }
             else{
               if(lastChild != null){
-                lastChild.line.color = '#fc7e54FF'
+                lastChild.line.color = '#ff4b32ff'
                 lastChild.line.size--
                 lastChild = null
               }
