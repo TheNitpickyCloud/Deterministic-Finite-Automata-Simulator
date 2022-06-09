@@ -30,6 +30,7 @@
       </div>
     </div>
     <Result :nodes="nodes" :adj="adj" />
+    <Footer />
 </template>
 
 <script>
@@ -42,6 +43,7 @@ import SettingsPanel from './components/SettingsPanel.vue'
 import HowToUse from './components/HowToUse.vue'
 import TweakPane from './components/TweakPane.vue'
 import Result from './components/Result.vue'
+import Footer from './components/Footer.vue'
 
 export default {
   name: 'App',
@@ -51,7 +53,8 @@ export default {
     SettingsPanel,
     HowToUse,
     TweakPane,
-    Result
+    Result,
+    Footer
   },
   setup(){
     const tweakAble = ref({
