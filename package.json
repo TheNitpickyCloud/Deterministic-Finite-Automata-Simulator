@@ -12,7 +12,8 @@
     "draggabilly": "^3.0.0",
     "leader-line-vue": "^2.1.1",
     "tweakpane": "^3.0.8",
-    "vue": "^3.2.13"
+    "vue": "^3.2.13",
+    "vue-gtag": "^2.0.1"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~5.0.0",
