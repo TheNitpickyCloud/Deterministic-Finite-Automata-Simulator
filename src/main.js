@@ -1,12 +1,4 @@
 import { createApp } from 'vue'
-import App from './App.vue'     
-import VueGtag from "vue-gtag"
+import App from './App.vue'         
 
-createApp(App).use(VueGtag, {
-  config: { 
-    id: "G-02NFFWP6SP",
-    params: {
-      anonymize_ip: true
-    }
-  }
-}).mount('#app')
+createApp(App).mount('#app')
