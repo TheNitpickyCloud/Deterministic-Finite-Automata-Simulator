@@ -138,8 +138,10 @@ export default {
             }
             else{
               if(lastChild != null){
-                lastChild.line.color = '#ff4b32ff'
-                lastChild.line.size--
+                lastChild.forEach((lastchild) => {
+                  lastchild.line.color = '#ff4b32ff'
+                  lastchild.line.size--
+                })
                 lastChild = null
               }
 
@@ -161,7 +163,10 @@ export default {
                         arr3.push({id: child.to, trav: node.trav+1})
                         child.line.color = 'blue'
                         child.line.size++
-                        lastChild = child
+                        if(lastChild === null){
+                          lastChild = []
+                        }
+                        lastChild.push(child)
                       }
                     })
                   }
