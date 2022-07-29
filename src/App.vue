@@ -29,7 +29,7 @@
         </div>
       </div>
     </div>
-    <Result :nodes="nodes" :adj="adj" />
+    <Result :nodes="nodes" :adj="adj" :reset="reset" :lines="lines" />
     <Footer />
 </template>
 
@@ -76,6 +76,7 @@ export default {
     const nodes = ref([]) //nodes objects
     const allnodes = ref([]) //nodes DOM elements
     const lines = ref([]) //lines here
+    const reset = ref(false)
     let selectedOne = false
     let selectedNodeId = null
     const adj = ref([]) //adjacency list of nodes
@@ -93,14 +94,14 @@ export default {
     function enterOver(line){
       if(mouseover == false){
         line.line.color = tweakAble.value.edgeHighlightColor
-        line.line.size++
+        line.line.size = 5
         mouseover = true
       }
     }
     function leaveOver(line){
       if(mouseover){
         line.line.color = tweakAble.value.edgeColor
-        line.line.size--
+        line.line.size = 4
         mouseover = false
       }
     }
@@ -111,6 +112,8 @@ export default {
           node.label = lineLabel
         }
       })
+
+      reset.value = !reset.value
     }
 
     function removeEdge(edgeId){
@@ -124,6 +127,7 @@ export default {
       })
       
       lines.value = lines.value.filter((line) => line.lineId != edgeId)
+      reset.value = !reset.value
     }
 
     async function addNode(){
@@ -186,6 +190,8 @@ export default {
           node.input = false
         }
       })
+      
+      reset.value = !reset.value
     }
 
     function deleteNode(nodeid){
@@ -199,6 +205,8 @@ export default {
         selectedNodeId = null
         selectedOne = false
       }
+
+      reset.value = !reset.value
     }
 
     function toggleNewLink(theid){
@@ -270,6 +278,7 @@ export default {
 
         selectedOne = false
         selectedNodeId = null
+        reset.value = !reset.value
       }
     }
 
@@ -301,7 +310,7 @@ export default {
       })
     })
 
-    return { tweakAble, nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, adj, linesComputed }
+    return { tweakAble, nodes, allnodes, toggleNewLink, lines, removeEdge, enterOver, leaveOver, updateLabel, updateInputNode, deleteNode, addNode, adj, linesComputed, reset }
   }
 }
 </script>

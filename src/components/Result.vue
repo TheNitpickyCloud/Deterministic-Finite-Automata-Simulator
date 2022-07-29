@@ -33,10 +33,10 @@
 </template>
 
 <script>
-import { ref } from '@vue/runtime-core'
+import { ref, watch } from '@vue/runtime-core'
 
 export default {
-  props: ["nodes", "adj"],
+  props: ["nodes", "adj", "reset", "lines"],
   setup(props, ){
     const startstr = ref() //input string
     const answer = ref('') //answer
@@ -48,11 +48,35 @@ export default {
     let lastChild = null
     let arr2 = []
 
+    watch(
+      () => [props.reset, runtype.value],
+      () => {
+        nxt.value = startstr.value.value
+        prev.value = ''
+        curr.value = ''
+        loc = 0
+        arr2 = []
+        props.lines.forEach((line) => {
+          line.line.color = '#ff4b32ff'
+          line.line.size = 4
+        })
+        lastChild = null
+      }
+    )
+
     function updateStr(){
       nxt.value = startstr.value.value
       prev.value = ''
       curr.value = ''
       loc = 0
+      arr2 = []
+      if(lastChild != null){
+        lastChild.forEach((lastchild) => {
+          lastchild.line.color = '#ff4b32ff'
+          lastchild.line.size = 4
+        })
+        lastChild = null
+      }
     }
 
     function runInput(){
