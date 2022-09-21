@@ -98,16 +98,27 @@ export default {
         }
         else{
           let emptyLabel = false
+          let duplicateLabel = false
           for (let i = 0; i < props.adj.length; i++) {
+            let labelList = []
             props.adj[i].forEach((node) => {
               if(node.label == ''){
                 emptyLabel = true
+              }
+              else if(labelList.includes(node.label)){
+                duplicateLabel = true
+              }
+              else{
+                labelList.push(node.label)
               }
             })
           }
 
           if(emptyLabel){
             alert("please make sure all edges have labels")
+          }
+          else if(duplicateLabel){
+            alert("please make sure there are no edges with the same labels exiting a node")
           }
           else{
             let arr = []
