@@ -1,7 +1,7 @@
 # dfasite
 
 ## Website link
-https://dfasite.herokuapp.com/
+https://dfasite.vercel.app/
 
 ## Project setup
 ```
